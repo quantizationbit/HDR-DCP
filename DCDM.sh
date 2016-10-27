@@ -9,13 +9,13 @@ rm -fv TIF*/*
 # find all exr files
 c1=0
 # generally set CMax to 3,4, 7,8 depending on number of cores
-CMax=1
+CMax=4
 
 num=1
 
 #for filename in $EDRDATA/EXR/StEM_DOLBY/PQ/StEM*XYZ/*.tif ; do
 # just the first files as test
-for filename in $EDRDATA/EXR/StEM_DOLBY/PQ/StEM*XYZ/*000000*tif ; do
+for filename in $EDRDATA/EXR/StEM_DOLBY/PQ/StEM*2020/*tif ; do
 
 
  # file name w/extension e.g. 000111.tiff
@@ -34,7 +34,7 @@ if [ $c1 -le $CMax ]; then
 
  
  
-(ctlrender -force -ctl $EDRHOME/ACES/CTL/INVPQ10k-2-XYZ.ctl -ctl $EDRHOME/ACES/CTL/XYZ2ACES.ctl $filename -format exr32 TMP$c1".exr"; \
+(ctlrender -force -ctl $EDRHOME/ACES/CTL/INVPQnk10k2020-2-OCES.ctl -param1 MAX 4000.0 $filename -format exr32 TMP$c1".exr"; \
 ctlrender -force  -ctl $EDRHOME/ACES/transforms/ctl/odt/dcdm/odt_dcdm.ctl TMP$c1".exr" -format tiff16 "TIF48/"$numStr".tiff"; \
 ctlrender -force  -ctl $EDRHOME/ACES/CTL/odt_dcdm_HDR.ctl -param1 MAX 100.0  TMP$c1".exr" -format tiff16 "TIF100/"$numStr".tiff"; \
 ctlrender -force  -ctl $EDRHOME/ACES/CTL/odt_dcdm_HDR.ctl -param1 MAX 150.0  TMP$c1".exr" -format tiff16 "TIF150/"$numStr".tiff"; \
@@ -58,5 +58,12 @@ done
 c1=0
 fi
 
+done
+
+
+for job in `jobs -p`
+do
+echo $job
+wait $job 
 done
 
