@@ -49,18 +49,18 @@ mkdir "TIFPQ"${NITS[0]}${MINS[5]} "TIFPQ"${NITS[1]}${MINS[5]} "TIFPQ"${NITS[2]}$
 # find all exr files
 c1=0
 # generally set CMax to 3,4, 7,8 depending on number of cores
-CMax=10
+CMax=8
 num=1
 
 #for filename in $EDRDATA/EXR/StEM_DOLBY/PQ/StEM*XYZ/*.tif ; do
 # just the first files as test
-for filename in /EDRDATA2/StEM_Dolby_PQ/StEM*Rain*2020/*tif ; do
+for filename in /EDRDATA2/Technicolor/Fireeater2Clip4000/*exr ; do
 
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
  # remove extension
- cFile="${cFile%.tif}"
+ cFile="${cFile%.exr}"
  # note cFile now does NOT have tiff extension!
  #echo -e "crop: $filename \n"
  
@@ -73,7 +73,9 @@ if [ $c1 -le $CMax ]; then
 
  
  
-(ctlrender -force -ctl ./InvODT.Academy.Rec2020_ST2084_4000nits.ctl -param1 aIn 1.0 $filename -format exr32 TMP$c1".exr"; \
+(ctlrender -force  \
+   -ctl ./709-2-2020PQ.ctl -param1 aIn 1.0 \
+   -ctl ./InvODT.Academy.Rec2020_ST2084_4000nits.ctl -param1 aIn 1.0 $filename -format exr32 TMP$c1".exr"; \
  \
  \
  \
@@ -101,7 +103,6 @@ ctlrender -force  -ctl ./ODT.Academy.P3DCI_XXXXnits.ctl -param1 aIn 1.0 -param1 
 ctlrender -force  -ctl ./ODT.Academy.P3DCI_XXXXnits.ctl -param1 aIn 1.0 -param1 MAX ${NITS[1]} -param1 MIN ${MINS[5]} -param1 PQ 1 TMP$c1".exr" -format tiff16 "TIFPQ"${NITS[1]}${MINS[5]}"/TIFPQ"${NITS[1]}${MINS[5]}$numStr".tiff"; \
 ctlrender -force  -ctl ./ODT.Academy.P3DCI_XXXXnits.ctl -param1 aIn 1.0 -param1 MAX ${NITS[0]} -param1 MIN ${MINS[5]} -param1 PQ 1 TMP$c1".exr" -format tiff16 "TIFPQ"${NITS[0]}${MINS[5]}"/TIFPQ"${NITS[0]}${MINS[5]}$numStr".tiff"; \
 ) &
- 
 
  sleep 0.1
 
