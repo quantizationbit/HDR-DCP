@@ -34,6 +34,7 @@
 
 
 import "ACESlib.Utilities";
+import "ACESlib.Utilities_Color";
 import "ACESlib.Transform_Common";
 import "ACESlib.ODT_Common";
 import "ACESlib.Tonescales";
@@ -51,6 +52,7 @@ const float NEW_WHT = 0.918;
 const float ROLL_WIDTH = 0.5;    
 const float SCALE = 0.96;
 
+const float norm = (0.3143/0.3429);
 
 
 void main 
@@ -65,7 +67,8 @@ void main
     output varying float aOut,
     input uniform float MAX = 48.0,
     input uniform float MIN = 0.02,
-    input uniform int   PQ  = 0
+    input uniform int   PQ  = 0,
+    input uniform int   DCDM = 0
 )
 {
     float oces[3] = { rIn, gIn, bIn};
@@ -158,21 +161,26 @@ void main
   // Convert to display primary encoding
     // Rendering space RGB to XYZ
     float XYZ[3] = mult_f3_f44( linearCV, AP1_2_XYZ_MAT);
+    float outputCV[3];
 
-    // CIE XYZ to display primaries
-    linearCV = mult_f3_f44( XYZ, XYZ_2_DISPLAY_PRI_MAT);
-
-  // Handle out-of-gamut values
+    if(DCDM) {
+	  // Encode linear code values with transfer function
+	  linearCV = mult_f_f3(norm, XYZ);
+    } else {
+	    // CIE XYZ to display primaries
+	    linearCV = mult_f3_f44( XYZ, XYZ_2_DISPLAY_PRI_MAT);
+    }   
+    
+    // Handle out-of-gamut values
     // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
     linearCV = clamp_f3( linearCV, 0., 1.);
   
-  float outputCV[3];
-  if(PQ == 1) {
-	outputCV = Y_2_ST2084_f3( mult_f_f3(10000.0,linearCV));
-  } else {
-    // Encode linear code values with transfer function
-    outputCV = pow_f3( linearCV, 1./ DISPGAMMA);
-  }
+    if(PQ == 1) {
+	  outputCV = Y_2_ST2084_f3( mult_f_f3(10000.0,linearCV));
+    } else {
+      // Encode linear code values with transfer function
+      outputCV = pow_f3( linearCV, 1./ DISPGAMMA);
+    }     
   
     rOut = outputCV[0];
     gOut = outputCV[1];
